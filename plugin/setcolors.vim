@@ -50,7 +50,10 @@ endfunction
 
 function! s:LoadColors()
   let paths = split(globpath(&runtimepath, 'colors/*.vim'), "\n")
-  let s:mycolors = map(paths, 'fnamemodify(v:val, ":t:r")')
+  let s:mycolors =sort( map(paths, 'fnamemodify(v:val, ":t:r")'))
+  if exists('g:colors_name')
+    let s:current = index(s:mycolors, g:colors_name)
+  endif
 endfunction
 
 function! s:InitializeColors()
