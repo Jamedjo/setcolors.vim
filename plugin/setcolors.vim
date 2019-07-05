@@ -1,9 +1,9 @@
 " Change the color scheme from a list of color scheme names.
 " Version 2019 fork
 " Press key:
-"   F8                next scheme
-"   Shift-F8          previous scheme
-"   Alt-F8            random scheme
+"   F8          next scheme
+"   F7          previous scheme
+"   F9     random scheme
 " Set the list of color schemes used by the above (default is 'all'):
 "   :SetColors all              (all $VIMRUNTIME/colors/*.vim)
 "   :SetColors blue slate ron   (these schemes)
@@ -37,11 +37,15 @@ endfunction
 
 command! -nargs=* SetColors call s:SetColors('<args>')
 
-" Set next/previous/random (how = 1/-1/0) color from our list of colors.
-" The 'random' index is actually set from the current time in seconds.
 " Global (no 's:') so can easily call from command line.
-function! NextColor(how)
-  call s:NextColor(a:how, 1)
+function! NextColor()
+  call s:CycleColor(1, 1)
+endfunction
+function! PrevColor()
+  call s:CycleColor(-1, 1)
+endfunction
+function! RandomColor()
+  call s:RandomColor(1)
 endfunction
 
 function! s:LoadColors()
@@ -49,37 +53,49 @@ function! s:LoadColors()
   let s:mycolors = map(paths, 'fnamemodify(v:val, ":t:r")')
 endfunction
 
-" Helper function for NextColor(), allows echoing of the color name to be
-" disabled.
-function! s:NextColor(how, echo_color)
+function! s:InitializeColors()
   if len(s:mycolors) == 0
-    call s:SetColors('all')
+    call s:LoadColors()
   endif
-  let missing = []
+endfunction
+
+function! s:CycleColor(how, echo_color)
+  call s:InitializeColors()
+
   let s:current += a:how
 
   if !(0 <= s:current && s:current < len(s:mycolors))
     let s:current = (a:how>0 ? 0 : len(s:mycolors)-1)
   endif
 
+  call s:ActivateColor(s:mycolors[s:current], a:echo_color)
+endfunction
+
+function! s:RandomColor(echo_color)
+  call s:InitializeColors()
+
+  let s:current = s:Random(len(s:mycolors)-1)
+  call s:ActivateColor(s:mycolors[s:current], a:echo_color)
+endfunction
+
+function! s:Random(max) abort
+  return str2nr(matchstr(reltimestr(reltime()), '\v\.@<=\d+')[1:]) % a:max
+endfunction
+
+function! s:ActivateColor(colorscheme, echo_color)
   try
-    execute 'colorscheme '.s:mycolors[s:current]
+    execute 'colorscheme '. a:colorscheme
   catch /E185:/
-    call add(missing, s:mycolors[s:current])
+    echo 'Error: colorscheme not found:' a:colorscheme
   endtry
 
   redraw
-
-  if len(missing) > 0
-    echo 'Error: colorscheme not found:' join(missing)
-  endif
 
   if (a:echo_color)
     echo g:colors_name
   endif
 endfunction
 
-nnoremap <F8> :call NextColor(1)<CR>
-nnoremap <F7> :call NextColor(-1)<CR>
-
-
+nnoremap <F7> :call PrevColor()<CR>
+nnoremap <F8> :call NextColor()<CR>
+nnoremap <F9> :call RandomColor()<CR>
