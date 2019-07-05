@@ -1,5 +1,5 @@
 " Change the color scheme from a list of color scheme names.
-" Version 2010-09-12 from http://vim.wikia.com/wiki/VimTip341
+" Version 2019 fork
 " Press key:
 "   F8                next scheme
 "   Shift-F8          previous scheme
@@ -13,7 +13,7 @@ if v:version < 700 || exists('loaded_setcolors') || &cp
 endif
 
 let loaded_setcolors = 1
-let s:mycolors = ['slate', 'torte', 'darkblue', 'delek', 'murphy', 'elflord', 'pablo', 'koehler']  " colorscheme names that we use to set color
+let s:mycolors = []
 let s:current = -1
 
 " Set list of color scheme names that we will use, except
@@ -27,8 +27,7 @@ function! s:SetColors(args)
       let i += 5
     endwhile
   elseif a:args == 'all'
-    let paths = split(globpath(&runtimepath, 'colors/*.vim'), "\n")
-    let s:mycolors = map(paths, 'fnamemodify(v:val, ":t:r")')
+    call s:LoadColors()
     echo 'List of colors set from all installed color schemes'
   else
     let s:mycolors = split(a:args)
@@ -43,6 +42,11 @@ command! -nargs=* SetColors call s:SetColors('<args>')
 " Global (no 's:') so can easily call from command line.
 function! NextColor(how)
   call s:NextColor(a:how, 1)
+endfunction
+
+function! s:LoadColors()
+  let paths = split(globpath(&runtimepath, 'colors/*.vim'), "\n")
+  let s:mycolors = map(paths, 'fnamemodify(v:val, ":t:r")')
 endfunction
 
 " Helper function for NextColor(), allows echoing of the color name to be
