@@ -6,11 +6,8 @@
 "   Alt-F8            random scheme
 " Set the list of color schemes used by the above (default is 'all'):
 "   :SetColors all              (all $VIMRUNTIME/colors/*.vim)
-"   :SetColors my               (names built into script)
 "   :SetColors blue slate ron   (these schemes)
 "   :SetColors                  (display current scheme names)
-" Set the current color scheme based on time of day:
-"   :SetColors now
 if v:version < 700 || exists('loaded_setcolors') || &cp
   finish
 endif
@@ -33,12 +30,6 @@ function! s:SetColors(args)
     let paths = split(globpath(&runtimepath, 'colors/*.vim'), "\n")
     let s:mycolors = map(paths, 'fnamemodify(v:val, ":t:r")')
     echo 'List of colors set from all installed color schemes'
-  elseif a:args == 'my'
-    let c1 = 'default elflord peachpuff desert256 breeze morning'
-    let c2 = 'darkblue gothic aqua earth black_angus relaxedgreen'
-    let c3 = 'darkblack freya motus impact less chocolateliquor'
-    let s:mycolors = split(c1.' '.c2.' '.c3)
-    echo 'List of colors set from built-in names'
   else
     let s:mycolors = split(a:args)
     echo 'List of colors set from argument (space-separated names)'
